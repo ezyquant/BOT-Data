@@ -1,5 +1,5 @@
-pandas
-lxml
+pandas>=1.2
+lxml>=4.5
 
 # Dev
 black

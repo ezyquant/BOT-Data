@@ -1,21 +1,44 @@
-from datetime import date
-from typing import List
+from datetime import date, datetime, timedelta
+from functools import lru_cache
+from typing import List, TypeVar
 
 import pandas as pd
+from pandas.tseries.offsets import CustomBusinessDay
+
+"""
+Holiday
+"""
 
 
 def get_holidays(year: int) -> List[date]:
+    """Get holidays from Bank of Thailand website https://www.bot.or.th/Thai/FinancialInstitutions/FIholiday
+
+    Parameters
+    ----------
+    year : int
+        Year
+
+    Returns
+    -------
+    List[date]
+        List of holidays
+    """
     return get_holidays_series(year=year).map(lambda x: x.date()).tolist()
 
 
+@lru_cache
 def get_holidays_series(year: int) -> pd.Series:
-    """Get holidays from Bank of Thailand website
+    """Get holidays from Bank of Thailand website https://www.bot.or.th/Thai/FinancialInstitutions/FIholiday
 
-    Args:
-        year (int): year
+    Parameters
+    ----------
+    year : int
+        Year
 
-    Returns:
-        List[date]: list of holidays
+    Returns
+    -------
+    pd.Series
+        Series of holidays
     """
     # df should contains the following columns: Index, Day of week, Day of month, Month, Description
     df = pd.read_html(
@@ -37,26 +60,71 @@ def get_holidays_series(year: int) -> pd.Series:
 def is_holiday(date_: date) -> bool:
     """Check if date is holiday
 
-    Args:
-        date_ (date): date
+    Parameters
+    ----------
+    date_ : date
+        Date
 
-    Returns:
-        bool: True if date is holiday
+    Returns
+    -------
+    bool
+        True if date is holiday
     """
     return date_ in get_holidays(date_.year)
+
+
+"""
+Business Day
+"""
 
 
 def is_business_day(date_: date) -> bool:
     """Check if date is business day
 
-    Args:
-        date_ (date): date
+    Parameters
+    ----------
+    date_ : date
+        Date
 
-    Returns:
-        bool: True if date is business day
+    Returns
+    -------
+    bool
+        True if date is business day
     """
     return date_.weekday() < 5 and not is_holiday(date_)
 
 
-if __name__ == "__main__":
-    print(get_holidays(2020))
+T = TypeVar("T", bound=date)
+
+
+def next_business_day(date_: T, n: int = 1) -> T:
+    """Next business day
+
+    Parameters
+    ----------
+    date_ : date
+        Date
+    n : int, optional
+        n business days, can be negative, by default 1
+
+    Returns
+    -------
+    date
+        Date of next business day
+    """
+    holidays = get_holidays_series(date_.year).tolist()
+
+    next_date = date_ + timedelta(n + 5 if n > 0 else n - 5)
+
+    if next_date.year != date_.year:
+        holidays += get_holidays_series(next_date.year).tolist()
+
+    bd = CustomBusinessDay(n, holidays=holidays)
+
+    ts = date_ + bd
+    if type(date_) is date:
+        return ts.date()  # type: ignore
+    elif type(date_) is datetime:
+        return ts.to_pydatetime()  # type: ignore
+    else:
+        return ts

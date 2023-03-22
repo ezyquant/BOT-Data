@@ -1,6 +1,7 @@
-from datetime import date
+from datetime import date, datetime
 from unittest.mock import ANY
 
+import pandas as pd
 import pytest
 
 import botdata as bd
@@ -104,3 +105,33 @@ def test_is_business_day(date_: date, expected: bool):
 
     # Check
     assert result is expected
+
+
+@pytest.mark.parametrize(
+    (("date_", "n", "expected")),
+    [
+        # test date
+        (date(2020, 1, 1), 1, date(2020, 1, 2)),
+        (date(2020, 1, 2), 1, date(2020, 1, 3)),
+        (date(2020, 1, 3), 1, date(2020, 1, 6)),
+        (date(2020, 1, 4), 1, date(2020, 1, 6)),
+        (date(2020, 1, 5), 1, date(2020, 1, 6)),
+        # test n
+        (date(2020, 1, 1), 0, date(2020, 1, 2)),
+        (date(2020, 1, 2), 0, date(2020, 1, 2)),
+        (date(2020, 1, 1), -1, date(2019, 12, 30)),
+        (date(2020, 1, 2), -1, date(2019, 12, 30)),
+        (date(2020, 12, 30), 1, date(2021, 1, 4)),
+        (date(2020, 12, 31), 1, date(2021, 1, 4)),
+        # test datatype
+        (datetime(2020, 1, 1), 1, datetime(2020, 1, 2)),
+        (pd.Timestamp(2020, 1, 1), 1, pd.Timestamp(2020, 1, 2)),
+    ],
+)
+def test_next_business_day(date_: date, n: int, expected: bool):
+    # Test
+    result = bd.next_business_day(date_=date_, n=n)
+
+    # Check
+    assert result == expected
+    assert type(result) == type(date_)

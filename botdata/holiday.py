@@ -46,7 +46,7 @@ def get_holidays_series(year: int) -> pd.Series:
     )[0]
 
     # Drop incorrect row usually from recursive
-    df = df.dropna(axis=1, how="any", subset=[2, 3])
+    df = df.dropna(axis=0, how="any", subset=[2, 3])
     # Drop cancelled holiday
     df = df[~df[4].str.contains("cancelled", case=False, na=False)]
     # Concat Day, Month, Year

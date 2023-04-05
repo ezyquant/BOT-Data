@@ -50,7 +50,7 @@ def get_holidays_series(year: int) -> pd.Series:
     # Drop cancelled holiday
     df = df[~df[4].str.contains("cancelled", case=False, na=False)]
     # Concat Day, Month, Year
-    date_str_ser = df[2].astype(str) + " " + df[3] + " " + str(year)
+    date_str_ser = df[2].astype(str).str[:-2] + " " + df[3] + " " + str(year)
     # Remove non-ascii characters usually unicode
     date_str_ser = date_str_ser.str.encode("ascii", "ignore").str.decode("ascii")
 

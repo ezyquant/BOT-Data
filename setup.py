@@ -25,7 +25,7 @@ setup(
     maintainer="Fintech (Thailand) Company Limited",
     maintainer_email="admin@fintech.co.th",
     python_requires=">=3.8",
-    install_requires=["pandas>=1.3", "lxml>=4.0"],
+    install_requires=["pandas>=1.2", "requests>=2.0"],
     license="The MIT License (MIT)",
     classifiers=[
         "Intended Audience :: Financial and Insurance Industry",

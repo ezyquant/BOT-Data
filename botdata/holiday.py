@@ -3,6 +3,7 @@ from functools import lru_cache
 from typing import List, TypeVar
 
 import pandas as pd
+import requests
 from pandas.tseries.offsets import CustomBusinessDay
 
 """
@@ -40,19 +41,17 @@ def get_holidays_series(year: int) -> pd.Series:
     pd.Series
         Series of holidays
     """
-    # df should contains the following columns: Index, Day of week, Day of month, Month, Description
-    df = pd.read_html(
-        f"https://www.bot.or.th/English/FinancialInstitutions/FIholiday/Pages/{year}.aspx"
-    )[0]
+    # Send a GET request to the website
+    url = f"https://www.bot.or.th/content/bot/en/financial-institutions-holiday/jcr:content/root/container/holidaycalendar.model.{year}.json"
+    response = requests.get(url)
+    data = response.json()
+    if "holidayCalendarLists" not in data:
+        raise ValueError(f"Year {year} is not available")
 
-    # Drop incorrect row usually from recursive
-    df = df.dropna(axis=0, how="any", subset=[2, 3])
-    # Drop cancelled holiday
-    df = df[~df[4].str.contains("cancelled", case=False, na=False)]
-    # Concat Day, Month, Year
-    date_str_ser = df[2].astype(str).str[:-2] + " " + df[3] + " " + str(year)
-    # Remove non-ascii characters usually unicode
-    date_str_ser = date_str_ser.str.encode("ascii", "ignore").str.decode("ascii")
+    # df columns 'holidayDescription', 'date', 'month', 'year'
+    df = pd.DataFrame(data["holidayCalendarLists"])
+
+    date_str_ser = df["date"] + " " + df["month"] + " " + df["year"]
 
     return pd.to_datetime(date_str_ser)
 
@@ -114,7 +113,7 @@ def next_business_day(date_: T, n: int = 1) -> T:
     """
     holidays = get_holidays_series(date_.year).tolist()
 
-    next_date = date_ + timedelta(n + 5 if n > 0 else n - 5)
+    next_date = date_ + timedelta(n + 5 if n >= 0 else n - 5)
 
     if next_date.year != date_.year:
         holidays += get_holidays_series(next_date.year).tolist()

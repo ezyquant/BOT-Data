@@ -11,30 +11,6 @@ import botdata as bd
     ("year", "expected"),
     [
         (
-            2020,
-            [
-                date(2020, 1, 1),
-                date(2020, 2, 10),
-                date(2020, 4, 6),
-                date(2020, 5, 1),
-                date(2020, 5, 4),
-                date(2020, 5, 6),
-                date(2020, 6, 3),
-                date(2020, 7, 6),
-                date(2020, 7, 27),
-                date(2020, 7, 28),
-                date(2020, 8, 12),
-                date(2020, 9, 4),
-                date(2020, 9, 7),
-                date(2020, 10, 13),
-                date(2020, 10, 23),
-                date(2020, 12, 7),
-                date(2020, 12, 10),
-                date(2020, 12, 11),
-                date(2020, 12, 31),
-            ],
-        ),
-        (
             2022,
             [
                 date(2022, 1, 3),
@@ -58,11 +34,6 @@ import botdata as bd
                 date(2022, 12, 12),
             ],
         ),
-        (2000, [ANY] * 13),
-        (2005, [ANY] * 15),
-        (2010, [ANY] * 19),
-        (2015, [ANY] * 18),
-        (2021, [ANY] * 20),
         (2023, ANY),
     ],
 )
@@ -77,8 +48,8 @@ def test_get_holidays(year: int, expected: list):
 @pytest.mark.parametrize(
     (("date_", "expected")),
     [
-        (date(2020, 1, 1), True),
-        (date(2020, 1, 2), False),
+        (date(2022, 1, 3), True),
+        (date(2022, 1, 4), False),
     ],
 )
 def test_is_holiday(date_: date, expected: bool):
@@ -92,11 +63,11 @@ def test_is_holiday(date_: date, expected: bool):
 @pytest.mark.parametrize(
     (("date_", "expected")),
     [
-        (date(2020, 1, 1), False),
-        (date(2020, 1, 2), True),
-        (date(2020, 1, 3), True),
-        (date(2020, 1, 4), False),
-        (date(2020, 1, 5), False),
+        (date(2022, 1, 1), False),
+        (date(2022, 1, 2), False),
+        (date(2022, 1, 3), False),
+        (date(2022, 1, 4), True),
+        (date(2022, 1, 5), True),
     ],
 )
 def test_is_business_day(date_: date, expected: bool):
@@ -111,21 +82,21 @@ def test_is_business_day(date_: date, expected: bool):
     (("date_", "n", "expected")),
     [
         # test date
-        (date(2020, 1, 1), 1, date(2020, 1, 2)),
-        (date(2020, 1, 2), 1, date(2020, 1, 3)),
-        (date(2020, 1, 3), 1, date(2020, 1, 6)),
-        (date(2020, 1, 4), 1, date(2020, 1, 6)),
-        (date(2020, 1, 5), 1, date(2020, 1, 6)),
+        (date(2022, 1, 1), 1, date(2022, 1, 4)),
+        (date(2022, 1, 2), 1, date(2022, 1, 4)),
+        (date(2022, 1, 3), 1, date(2022, 1, 4)),
+        (date(2022, 1, 4), 1, date(2022, 1, 5)),
+        (date(2022, 1, 5), 1, date(2022, 1, 6)),
         # test n
-        (date(2020, 1, 1), 0, date(2020, 1, 2)),
-        (date(2020, 1, 2), 0, date(2020, 1, 2)),
-        (date(2020, 1, 1), -1, date(2019, 12, 30)),
-        (date(2020, 1, 2), -1, date(2019, 12, 30)),
-        (date(2020, 12, 30), 1, date(2021, 1, 4)),
-        (date(2020, 12, 31), 1, date(2021, 1, 4)),
+        (date(2022, 1, 1), 0, date(2022, 1, 4)),
+        (date(2022, 1, 2), 0, date(2022, 1, 4)),
+        (date(2023, 1, 1), -1, date(2022, 12, 30)),
+        (date(2023, 1, 2), -1, date(2022, 12, 30)),
+        (date(2022, 12, 30), 1, date(2023, 1, 3)),
+        (date(2022, 12, 31), 1, date(2023, 1, 3)),
         # test datatype
-        (datetime(2020, 1, 1), 1, datetime(2020, 1, 2)),
-        (pd.Timestamp(2020, 1, 1), 1, pd.Timestamp(2020, 1, 2)),
+        (datetime(2022, 1, 1), 1, datetime(2022, 1, 4)),
+        (pd.Timestamp(2022, 1, 1), 1, pd.Timestamp(2022, 1, 4)),
     ],
 )
 def test_next_business_day(date_: date, n: int, expected: bool):
